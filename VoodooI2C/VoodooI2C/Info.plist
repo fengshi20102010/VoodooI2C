@@ -468,6 +468,20 @@
 			<string>com.alexandred.VoodooI2C</string>
 			<key>IOClass</key>
 			<string>VoodooI2CNativeEngine</string>
+			<key>ForceClickMode</key>
+			<integer>1</integer>
+			<key>ForceClickThreshold</key>
+			<integer>180</integer>
+			<key>ForceClickHysteresis</key>
+			<integer>40</integer>
+			<key>ForceClickDwellMs</key>
+			<integer>0</integer>
+			<key>ForceClickFollowSystem</key>
+			<integer>1</integer>
+			<key>ForceClickFirmnessStep</key>
+			<integer>20</integer>
+			<key>ForceClickDiagnostics</key>
+			<integer>0</integer>
 			<key>IOMatchCategory</key>
 			<string>VoodooI2CNativeEngine</string>
 			<key>IOProviderClass</key>
