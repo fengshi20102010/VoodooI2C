@@ -471,7 +471,7 @@
 			<key>ForceClickMode</key>
 			<integer>1</integer>
 			<key>ForceClickThreshold</key>
-			<integer>180</integer>
+			<integer>160</integer>
 			<key>ForceClickHysteresis</key>
 			<integer>40</integer>
 			<key>ForceClickDwellMs</key>

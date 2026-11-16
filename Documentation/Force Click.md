@@ -27,7 +27,7 @@ haptic feedback: the pad's own click feedback (if any) is unchanged.
 | Key | Default | Range | Meaning |
 | --- | --- | --- | --- |
 | `ForceClickMode` | 1 | 0-1 | 0 = original emulation (every press is a Force Click), 1 = pressure threshold |
-| `ForceClickThreshold` | 180 | 1-255 | `TipPressure` that starts a Force Click (at the "medium" Click setting) |
+| `ForceClickThreshold` | 160 | 1-255 | `TipPressure` that starts a Force Click (at the "medium" Click setting) |
 | `ForceClickHysteresis` | 40 | 0-254 | exit level = threshold - hysteresis; must be below the threshold |
 | `ForceClickDwellMs` | 0 | 0-1000 | time the pressure must stay at or above the exit level after reaching the threshold |
 | `ForceClickFollowSystem` | 1 | 0-1 | move the threshold with the macOS Click setting |
@@ -72,7 +72,7 @@ in daily use.
 | `analyze.py` | replays the mode 1 rule on recorded traces for every threshold / dwell pair and lists false Force Clicks, missed Force Clicks and latency; pools several files |
 | `validate.sh` | step 2: fixed `THR` / `DWELL` on new presses, prints the results per phase |
 | `firmness.sh` | step 3: light / medium / firm Click setting, checks that the threshold moves |
-| `samples/measure-tm3572-001.csv` | one measurement session on a Synaptics TM3572-001 |
+| `samples/tm3572-run*.csv` | the five sessions on a Synaptics TM3572-001 used below (runs 3-5 include traces) |
 
 The scripts save the driver configuration, enable diagnostics for the run and restore the configuration when
 they end. Every press must be pressed down (a tap is not a physical press and would count as an extra click).
@@ -105,40 +105,50 @@ Passing the pressure to macOS and letting it pick the stage needs no device butt
 Force Clicks; that variant was dropped. From the mapped runs macOS appeared to start a click at about 50/255 and
 a Force Click at about 210-220/255 of the reported pressure (few samples).
 
-Peak `TipPressure` per press, 20 normal clicks + 20 hard presses per run (run 1: original emulation and
-threshold 140 together; run 2: threshold 170; run 3: measurement with traces):
+Peak `TipPressure` per press (run 1: original emulation and threshold 140 together; run 2: threshold 170;
+run 3: measurement with traces; run 4: validation at 180; run 5: Click setting light / medium / firm at
+160 / 180 / 200, 10 + 10 presses each):
 
-| Run | Normal clicks | Hard presses |
+| Run | Normal clicks | Hard presses (median) |
 | --- | --- | --- |
-| 1 | 55-132 | 189-255 |
-| 2 | 66-172 | 146-255 |
-| 3 | 59-115 | 82-255 |
+| 1 | 55-132 | 189-255 (255) |
+| 2 | 66-172 | 146-255 (255) |
+| 3 | 59-115 | 82-255 (216) |
+| 4 | 51-150 | 109-255 (200) |
+| 5 light / medium / firm | 63-116 / 53-126 / 60-139 | 86-250 (124) / 116-179 (121) / 191-255 (255) |
 
-| Threshold | False FC (of 60) | Missed (of 60) |
+How hard a "hard press" is drifts a lot between sessions (median 121 to 255), while normal clicks stay
+below about 150 with rare peaks up to 172. Pooled over all sessions (110 normal clicks, 90 hard presses at the
+medium setting):
+
+| Threshold | False FC | Missed |
 | --- | --- | --- |
-| 150 | 5 | 3 |
-| 160 | 3 | 4 |
-| 170 | 2 | 6 |
-| **180** | **0** | **8** |
-| 190 | 0 | 9 |
+| 140 | 7 (6.4%) | 11 (12.2%) |
+| 150 | 6 (5.5%) | 12 (13.3%) |
+| **160** | **3 (2.7%)** | **18 (20.0%)** |
+| 170 | 2 (1.8%) | 21 (23.3%) |
+| 180 | 0 | 26 (28.9%) |
 
-180 is the lowest threshold without false Force Clicks; 6 of the 8 misses are from run 3, two of them with peaks
-of 82 and 126 that were hardly hard presses. A false Force Click (Look Up instead of opening a link) is worse
-than a miss (press a little harder), so the default is 180.
+A false Force Click (Look Up instead of opening a link) is worse than a miss (press a little harder), so the
+medium default stays on the low-false side, but 180 (chosen after runs 1-3) missed 18 of the 30 hard presses
+at the medium setting in runs 4-5. The default is 160; with the step of 20 the Click setting gives light = 140 (Force Click easily),
+medium = 160, firm = 180 (no false Force Click in any session).
 
-Extra clicks: with mode 1, 1 of 100 presses produced two clicks (run 1, a normal click with peak 109, no Force
-Click involved); with the original emulation 3 of 10 normal clicks did.
+Extra clicks: with mode 1, 1 of 200 presses produced two clicks (run 1, a normal click with peak 109, no Force
+Click involved); with the original emulation 3 of 10 normal clicks did. In runs 4-5 (100 presses) the
+driver's decision matched the stage macOS delivered for every press, every press was exactly one click, and
+the effective threshold followed the Click setting (160 / 180 / 200).
 
 Dwell time (run 3, with traces, `samples/measure-tm3572-001.csv`): for every threshold the result was the same
 for dwell times from 0 to 160 ms, so in these presses the normal clicks never crossed a threshold briefly.
 The only setting without errors was threshold 80 with 300 ms dwell; it separates the presses by how long they
 are held, not by force, adds about 330 ms of latency and has no neighbours with the same result, so it was not
 used. `analyze.py` on this run alone suggests threshold 120, which run 2 (normal clicks up to 172) contradicts:
-use several sessions. `ForceClickDwellMs` stays available with a default of 0.
+use several sessions. On the traced runs 3-5 (70 normal clicks, 50 hard presses at medium) a dwell removes
+at most one false Force Click at threshold 140-150 and costs 120-160 ms; at 160 it changes nothing.
+`ForceClickDwellMs` stays available with a default of 0.
 
-Click setting step, over the same 60 + 60 presses: a step of 20 gives light = 160 (3 false FC) and
-firm = 200 (9 missed); a step of 30 gives light = 150 (5 false FC) and firm = 210 (13 missed). The default step
-is 20.
+Click setting step: 20 keeps light (140) at 6.4% false Force Clicks; 30 would put light at 130 (10.9%).
 
-Not yet measured: `validate.sh` with the final defaults, `firmness.sh` on this device, and other pressure
-pads. Values for other devices may differ; use the procedure above and report them.
+Not yet measured: other pressure pads. Values for other devices may differ; use the procedure above and report
+them.
