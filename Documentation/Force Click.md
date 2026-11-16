@@ -22,6 +22,31 @@ Touchpads that never report a non-zero pressure, and two-button touchpads, keep 
 Force Click must be enabled in System Settings ("Force Click and haptic feedback") as before. This does not add
 haptic feedback: the pad's own click feedback (if any) is unchanged.
 
+## Limitations
+
+**No variable pressure.** The driver reads the real `TipPressure` but uses it only to decide between a normal
+click and a Force Click. VoodooInput emulates a Magic Trackpad 2 and fills the pressure macOS sees as follows:
+
+| What the engine reports | Pressure macOS receives |
+| --- | --- |
+| finger resting, `supportsPressure` false | 5 |
+| physical button down (normal click) | 120, whatever the real pressure |
+| button cleared, `supportsPressure` true (Force Click) | the value set by the engine: 255 |
+
+So macOS gets three levels. Features that vary with force inside a Force Click (the faster fast-forward in
+QuickTime, line width in Markup, zoom speed in Maps) only see "Force Click or not"; Look Up, previews, Quick
+Look, rename and App Exposé work normally.
+
+Passing the real pressure with the button cleared makes macOS decide the click stage itself. That was measured
+(run 1 below) and dropped: clicks and Force Clicks were lost. A possible extension, not implemented: keep the
+button for the normal click and, only during the Force Click, map `TipPressure` from the threshold to 255 onto
+the range above macOS's second stage (about 210-255 of the reported pressure). Open points: macOS's exit level
+for the second stage is unknown (the stage could flicker), the range is narrow, and few applications use it.
+
+**No haptic feedback.** On the TM3572-001 the actuator is not exposed through the HID Haptics page (0x0E) or
+any RMI4 function (F01, F12, F34, F54, F55); its vendor reports 0xA0-0xA3 are undocumented. A Force Click
+gives no click feel, only the on-screen result.
+
 ## Configuration
 
 | Key | Default | Range | Meaning |
