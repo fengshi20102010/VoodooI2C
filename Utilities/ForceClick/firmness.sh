@@ -1,8 +1,8 @@
 #!/bin/bash
 # Step 3 - the macOS "Click" setting (light / medium / firm) must move the Force Click threshold.
-#     THR=180 DWELL=0 STEP=20 ./firmness.sh    # N=10 normal clicks + 10 hard presses per setting
+#     THR=160 DWELL=0 STEP=20 ./firmness.sh    # N=10 normal clicks + 10 hard presses per setting
 source "$(dirname "$0")/common.sh"
-THR=${THR:-180}; DWELL=${DWELL:-0}; STEP=${STEP:-20}; N=${N:-10}
+THR=${THR:-160}; DWELL=${DWELL:-0}; STEP=${STEP:-20}; N=${N:-10}
 OUT="$RESULTS/firmness-thr$THR-s$STEP-$(date +%Y%m%d-%H%M%S).csv"
 ORIG=$(fc_click_setting)
 fc_set ForceClickMode=1 ForceClickThreshold="$THR" ForceClickHysteresis=40 ForceClickDwellMs="$DWELL" ForceClickFollowSystem=1 ForceClickFirmnessStep="$STEP"

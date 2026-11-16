@@ -1,9 +1,9 @@
 #!/bin/bash
 # Step 2 - validation on NEW presses with fixed parameters (the Click setting is not followed here).
-#     THR=180 DWELL=0 ./validate.sh            # N=20 normal clicks + 20 hard presses
+#     THR=160 DWELL=0 ./validate.sh            # N=20 normal clicks + 20 hard presses
 # Pass: every press is exactly one click; no normal click becomes a Force Click; hard presses reach it.
 source "$(dirname "$0")/common.sh"
-THR=${THR:-180}; HYS=${HYS:-40}; DWELL=${DWELL:-0}; N=${N:-20}
+THR=${THR:-160}; HYS=${HYS:-40}; DWELL=${DWELL:-0}; N=${N:-20}
 LABEL="VALIDATE-thr$THR-d$DWELL"
 OUT="$RESULTS/validate-thr$THR-d$DWELL-$(date +%Y%m%d-%H%M%S).csv"
 fc_set ForceClickMode=1 ForceClickThreshold="$THR" ForceClickHysteresis="$HYS" ForceClickDwellMs="$DWELL" ForceClickFollowSystem=0

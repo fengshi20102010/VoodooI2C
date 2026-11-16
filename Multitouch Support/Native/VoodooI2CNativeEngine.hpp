@@ -42,7 +42,7 @@ class EXPORT VoodooI2CNativeEngine : public VoodooI2CMultitouchEngine {
     // Sources, later wins: defaults, Info.plist personality, boot-args, setProperties (administrator only).
     struct ForceClickConfig {
         UInt32 mode = 1;
-        UInt32 threshold = 180;
+        UInt32 threshold = 160;
         UInt32 hysteresis = 40;
         UInt32 dwellMs = 0;
         UInt32 followSystem = 1;      // move the threshold with the macOS "Click" setting
